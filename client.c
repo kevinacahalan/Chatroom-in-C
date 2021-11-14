@@ -45,6 +45,21 @@ void send_msg_handler() {
         if (strcmp(message, "exit") == 0) {
             break;
         } else {
+            // From gcc warning note: "note: ‘sprintf’ output between 4 and 2082 bytes"
+            //
+            // WHY IS THE MAX AMOUNT TO PRINT 2082 and not 2084?
+            // 
+            // 2048 bytes from message
+            // 32 bytes from name
+            // 2048 + 32 is 2080
+            //
+            // 1 byte from ":"
+            // 1 byte from " "
+            // but NOTHING from "\n" !!!?!?!
+            // AND NOTHING FROM "\0"
+            //
+            // Well, sprintf removes the nulls bytes from "name" and "message"
+            // The math comes out to (2048 - 1) + (32 - 1) + 2, which is 2082
             sprintf(buffer, "%s: %s\n", name, message);
             send(sockfd, buffer, strlen(buffer), 0);
         }
